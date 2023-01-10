@@ -8,7 +8,7 @@ class ReadUploadFileMusic extends Readable {
     const i = this.index++
 
     setTimeout(() => {
-      if (i > 100) {
+      if (i > 5) {
         this.push(null)
       } else {
         const BufferI = Buffer.from(String(i))
@@ -23,4 +23,8 @@ class ReadUploadFileMusic extends Readable {
 fetch('http://localhost:3001', {
   method: 'POST',
   body: new ReadUploadFileMusic(),
+}).then(response => {
+  return response.text()
+}).then(data => {
+  console.log(data)
 })
