@@ -1,46 +1,48 @@
-// Readable Streams (Lendo) / Writable Streams (Enviando)
-
-// Streams -> 
-
-// process.stdin.pipe(process.stdout)
-
 import { Readable, Writable, Transform } from 'node:stream'
 
-class OneToHundredStream extends Readable {
+class ReadUploadFileMusic extends Readable {
   index = 1
+
   _read() {
     const i = this.index++
-
+    
     setTimeout(() => {
       if (i > 100) {
         this.push(null)
       } else {
-        const buff = Buffer.from(String(i))
-        
-        this.push(buff)
+        const BufferI = Buffer.from(String(i))
+
+        this.push(BufferI) // => Chunk 
       }
+
     }, 1000)
+  
+  }
+
+}
+
+class WriteUploadFileMusic extends Writable {
+  _write(chunk, encoding, callback) {
+    
+    console.log(Number(chunk.toString()) * 10)
+    callback() // => Encerra tudo que precisava ser executado
+  }
+
+}
+
+class TransformUploadFileMusic extends Transform {
+  _transform(chunk, encoding, callback) {
+
+    const getFile = Number(chunk.toString()) * -1
+    const BufferT = Buffer.from(String(getFile))
+
+    callback(null, BufferT) // => Param 1 (Erro), Param 2 (Dado a ser processado)
+
   }
 }
 
-class MultiplyByTenStream extends Writable {
-  _write(chunk, enconding, callback) {
-    console.log(Number(chunk.toString() * 10))
-    callback()
+new ReadUploadFileMusic()
+  .pipe(new TransformUploadFileMusic())
+  .pipe(new WriteUploadFileMusic())
 
-  }
-}
-
-class ConvertNegativeNumber extends Transform {
-  _transform(chunk, enconding, callback) {
-    const transformed = Number(chunk.toString() * (-1))
-    const buff = Buffer.from(String(transformed))
-
-    callback(null, buff)
-
-  }
-}
-
-new OneToHundredStream()
-.pipe(new ConvertNegativeNumber())
-.pipe(new MultiplyByTenStream())
+  // Buffer => Forma de transicionar dados entre streams para não enviar streams inteiros.
