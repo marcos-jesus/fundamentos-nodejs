@@ -1,4 +1,6 @@
 import http from 'node:http'
+import { randomUUID } from 'node:crypto'
+import { Database } from './database.js'
 import { json } from './middlewares/json.js'
 
 // Stateful - Stateless
@@ -6,7 +8,9 @@ import { json } from './middlewares/json.js'
 // Stateful => Sempre vai ter alguma informação sendo guardada em memória, e depende dos dados guardado na memória
 // Stateless => Não salva nada em memória, se parar e rodar vai se manter igual os dados/arquivos.
 
-const users = []
+
+const database = new Database()
+
 
 const server = http.createServer(async(request, response) => {
 
@@ -15,18 +19,23 @@ const server = http.createServer(async(request, response) => {
   await json(request, response)
 
   if(method === 'GET' && url === '/users') {
-    return response
-    .end(JSON.stringify(users))
+
+    const users = database.select('users')
+
+    return response.end(JSON.stringify(users))
   }
 
   if(method === 'POST' && url === '/users') {
 
     const { name, email } = request.body
-    users.push({
-      id: 1,
+
+    const user = {
+      id: randomUUID(),
       name: name,
       email: email,
-    })
+    }
+
+    database.insert('users', user)
 
     return response.writeHead(201).end()
   }
