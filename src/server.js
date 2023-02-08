@@ -1,43 +1,30 @@
 import http from 'node:http'
-import { randomUUID } from 'node:crypto'
-import { Database } from './database.js'
 import { json } from './middlewares/json.js'
+import { routes } from './routes.js'
+
+// Query Parameters - https://localhost:3000/users?userId=1&name=Marcos 
+// Route Parameters 
+// Request Body
 
 // Stateful - Stateless
 
 // Stateful => Sempre vai ter alguma informação sendo guardada em memória, e depende dos dados guardado na memória
 // Stateless => Não salva nada em memória, se parar e rodar vai se manter igual os dados/arquivos.
 
-
-const database = new Database()
-
-
 const server = http.createServer(async(request, response) => {
 
   const { method, url } = request
 
+  console.log(request)
+
   await json(request, response)
 
-  if(method === 'GET' && url === '/users') {
+  const route = routes.find(route => {
+    return route.method === method && route.path === url
+  })
 
-    const users = database.select('users')
-
-    return response.end(JSON.stringify(users))
-  }
-
-  if(method === 'POST' && url === '/users') {
-
-    const { name, email } = request.body
-
-    const user = {
-      id: randomUUID(),
-      name: name,
-      email: email,
-    }
-
-    database.insert('users', user)
-
-    return response.writeHead(201).end()
+  if (route) {
+    return route.handler(request, response)
   }
 
   return response.writeHead(404).end()
