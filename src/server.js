@@ -13,9 +13,7 @@ import { routes } from './routes.js'
 
 const server = http.createServer(async(request, response) => {
 
-  const { method, url } = request
-
-  console.log(request)
+  const { method, url } = request 
 
   await json(request, response)
 
@@ -26,7 +24,7 @@ const server = http.createServer(async(request, response) => {
   if (route) {
     const routeParams = req.url.match(route.path)
 
-    const params = { ...routeParams.groups }
+
     
     return route.handler(request, response)
   }
